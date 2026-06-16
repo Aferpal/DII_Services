@@ -2,9 +2,11 @@ CC=gcc
 
 CFLAGS=-Wall
 
-CINCLUDE=-I./inc
+CINCLUDE=-I./inc -I/usr/include/mysql -I/usr/include/mysql/mysql
 
-COPTIONS=-O2 $(CINCLUDE) -lmariadb
+CLINK=-L/usr/lib/ -lmariadb
+
+COPTIONS=-O2 $(CINCLUDE)
 
 SRC_DIR=./src
 
@@ -18,11 +20,11 @@ OBJ_LIST=
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	mkdir -p $(OBJ_DIR)
-	$(CC) $(CFLAGS) $(COPTIONS) -c $< -o $@
+	$(CC) $(CFLAGS) $(COPTIONS) -c $< -o $@ $(CLINK)
 
 build: $(OBJ_LIST)
 	mkdir -p $(OUT_DIR)
-	$(CC) $(CFLAGS) $(COPTIONS) $(OBJ_LIST) main.c -o $(OUT_DIR)/$(TARGET)
+	$(CC) $(CFLAGS) $(COPTIONS) $(OBJ_LIST) main.c -o $(OUT_DIR)/$(TARGET) $(CLINK)
 
 clean:
 	rm -f $(OUT_DIR)/*
