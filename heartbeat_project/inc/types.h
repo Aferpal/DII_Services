@@ -11,7 +11,7 @@ struct heartbeat_info {
 	hypervisor_id_t hypervisor_id;
 	uint64_t total_memory;
 	uint64_t free_memory;
-	uint64_t timestamp;
+	int64_t timestamp;
 	uint32_t seq_number;
 };
 

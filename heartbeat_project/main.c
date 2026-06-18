@@ -1,33 +1,50 @@
 #include<defines.h>
+#include<net_utils.h>
+#include<types.h>
 #include<hb_net.h>
+#include<sys/sysinfo.h>
+#include<time.h>
 #include<stdio.h>
+#include<unistd.h>
 
 int
 main(void)
 {
 
-	heartbeat_info_t hb_info = {
-		.hypervisor_id = 10,
-		.seq_number = 1220
+	heartbeat_info_t hb = {
+		.hypervisor_id = 1,
+		.seq_number = 1
 	};
 
-	sock_info_t sock_sender;
+	sock_info_t sock;
 
-	init_udp_str_ip(&sock_sender, "127.0.0.1", 8080);
+	init_udp(&sock, DEFAULT_IP, 9999);
 
-	sock_info_t sock_rec;
+	struct sysinfo s_info;
 
-	init_udp_str_ip(&sock_rec, "127.0.0.1", 8081);
+	ip_t ip;
 
-	connect_socket_str_ip(&sock_sender, "127.0.0.1", 8081);
+	if (str_to_ip("10.0.2.2", &ip) != HB_NET_SUCCESS) {
+		return -1;	
+	}
 
-	send_packet(&sock_sender, (const void*)&hb_info, sizeof(hb_info), sock_rec.ip, 8081);
+	while (1) {
+		if (sysinfo(&s_info) != -1) {
+			hb.total_memory = s_info.totalram;
+			hb.free_memory = s_info.freeram;
+			hb.seq_number++;
+			if (time(&hb.timestamp) != -1) {
+				send_packet(&sock, (const void*) &hb, sizeof(hb), ip, 9999);
+			} else {
+				printf("Failed to get time\n");
+			}
+			
+		} else {
+			printf("Failed to get sysinfo\n");
+		}
 
-	heartbeat_info_t hb_info_cp;
-
-	receive_packet(&sock_rec, (void*) &hb_info_cp, sizeof(hb_info_cp));
-
-	printf("Se ha recibido al final %d %d\n", hb_info_cp.hypervisor_id, hb_info_cp.seq_number);
+		sleep(TIMEOUT_SECONDS);
+	}
 
 	return 0;
 }

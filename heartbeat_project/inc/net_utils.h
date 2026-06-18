@@ -3,6 +3,8 @@
 
 #include"net_types.h"
 
+#define DEFAULT_IP 0
+#define DEFAULT_PORT 0
 #define toHex(_port) (((_port)>>8&0x00ff) + ((_port)<<8&0xff00))
 #define getip0(ip) ( ip >> 24 ) & 0x0ff
 #define getip1(ip) ( ip >> 16 ) & 0x0ff
