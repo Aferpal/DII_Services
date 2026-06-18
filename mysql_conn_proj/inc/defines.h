@@ -1,0 +1,14 @@
+#ifndef _DEFINES_H_
+#define _DEFINES_H_
+
+#define DEF_STRING_LEN 32
+
+#define ENV_DB_HOST "DII_MYSQL_HOST"
+
+#define ENV_DB_USER "DII_MYSQL_USER"
+
+#define ENV_DB_PASSWORD "DII_MYSQL_PASSWORD"
+
+#define ENV_DB_DATABASE "DII_MYSQL_DATABASE"
+
+#endif

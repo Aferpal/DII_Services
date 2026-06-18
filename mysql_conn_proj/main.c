@@ -1,8 +1,11 @@
 #include<stdio.h>
 #include<mysql.h>
 #include<unistd.h>
+#include"db_conn.h"
 
 MYSQL db_connection;
+
+db_conn_config_t config;
 
 void
 print_mysql_row(char **row, unsigned int n_fields)
@@ -24,7 +27,7 @@ main(void)
 	int err_code;
 
 	mysql_init(&db_connection);
-
+	
 	err = mysql_real_connect(
 		&db_connection,
 		"?.?.?.?",
