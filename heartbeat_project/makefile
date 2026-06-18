@@ -16,7 +16,7 @@ OBJ_DIR=./obj
 
 TARGET=app
 
-OBJ_LIST=
+OBJ_LIST=$(OBJ_DIR)/hb_net.o $(OBJ_DIR)/net_utils.o
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	mkdir -p $(OBJ_DIR)
