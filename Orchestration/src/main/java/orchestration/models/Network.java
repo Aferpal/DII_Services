@@ -8,21 +8,21 @@ import java.util.List;
 @Table(name = "NETWORK")
 public class Network {
 
-    @Id @GeneratedValue
-    public Long id;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public Integer id;
     public String name;
-    public Long owner;
+    public Integer owner;
 
     @OneToMany(mappedBy = "network_id")
     public List<VMNetwork> vms;
 
     public Network(){}
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -34,11 +34,11 @@ public class Network {
         this.name = name;
     }
 
-    public Long getOwner() {
+    public Integer getOwner() {
         return owner;
     }
 
-    public void setOwner(Long owner) {
+    public void setOwner(Integer owner) {
         this.owner = owner;
     }
 }
