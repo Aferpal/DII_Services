@@ -27,16 +27,16 @@ public class VMManagementService {
         this.volumeRepository = volumeRepository;
     }
 
-    public List<VM> getAllUserVMs(Integer user_id){
-        return vmRepository.findByOwner(user_id);
+    public List<VMDTO> getAllUserVMs(Integer user_id){
+        return vmRepository.findByOwner(user_id).stream().map(VMDTO::of).toList();
     }
 
-    public List<Network> getAllUserNetworks(Integer user_id){
-        return networkRepository.findByOwner(user_id);
+    public List<NetworkDTO> getAllUserNetworks(Integer user_id){
+        return networkRepository.findByOwner(user_id).stream().map(NetworkDTO::of).toList();
     }
 
-    public List<Volume> getAllUserVolumes(Integer user_id){
-        return volumeRepository.findByOwner(user_id);
+    public List<VolumeDTO> getAllUserVolumes(Integer user_id){
+        return volumeRepository.findByOwner(user_id).stream().map(VolumeDTO::of).toList();
     }
 
     public Optional<VMDTO> createVM(VMNewDTO vm_data){
