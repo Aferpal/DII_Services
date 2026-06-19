@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# $1 RAM
+# $2 Number of CPUs
+
+if [[ $1 == -h || $# -lt 2 ]]; then
+	echo "Missing arguments. Usage $(basename $0) [ ram (128M) ] [ CPUs (1) ] [ --drive=lun_id ] [ --net=net_name,MAC ] [ --telnet-port=port ] [ --default-so ]"
+	exit 1;
+fi
+
+COMMAND="qemu-system-x86_64 -m $1 -smp $2 -nographic --enable-kvm"
+shift;shift;
+
+net_count=0
+DRIVES=""
+
+for arg in "$@"; do
+	OPT=$(echo $arg | awk -F '=' '{print $1}')
+	case "$OPT" in
+		"--net")
+			IFS=, read -r BRIDGE MAC <<< $(echo $arg | awk -F '=' '{print $2}')
+
+			if [[ -z $BRIDGE || -z $MAC ]]; then
+				continue
+			fi
+			if [ $(nmcli c s | grep -c $BRIDGE) = 0 ]; then
+				echo "La red $BRIDGE no existe o no ha sido correctamente definida"
+				continue
+			fi
+
+			COMMAND="$COMMAND -device e1000,netdev=net$net_count,mac=$MAC -netdev bridge,br=$BRIDGE,id=net$net_count"
+			net_count=$((net_count + 1)) ;;
+		
+		"--drive")
+			LUN_ID=$(echo $arg | awk -F '=' '{print $2}')
+			REGEX=\[.:.:.:$LUN_ID\]
+			DEVICE=$(lsscsi | grep -e $REGEX | grep LV_VM1 | awk '{print $6}')
+			
+			if [ -z $DEVICE ]; then
+				echo "No existe el volumen con LUN_ID $LUN_ID"
+				continue
+			fi
+
+			DRIVES="$DRIVES -drive file=$DEVICE,format=raw,if=virtio" ;;
+	
+		"--default-so")
+			COMMAND="$COMMAND -drive file=/root/images/alpine-base.qcow2,format=qcow2,if=virtio" ;;
+
+		"--telnet-port")
+			PORT=$(echo $arg | awk -F '=' '{print $2}')
+			COMMAND="$COMMAND -serial mon:telnet::$PORT,server=on,wait=off" ;;
+	esac
+done
+
+COMMAND="$COMMAND $DRIVES &"
+eval "$COMMAND"

@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# $1 bridge name
+# $2 conn name
+# $3 bridge ip
+
+if [[ $# -ne 3 || $1 == "-h" ]]; then
+        echo "Usage: nmcli.br [ bridge_if_name (ov0-br) ] [ bridge_con_name (overlay0-br) ] [ bridge_ip (10.0.1.51) ]";
+        exit 0;
+fi
+
+
+if [ ! `nmcli d s | grep -c "$1"` != '0' -o ! `nmcli c s | grep -c "$2"` != '0' ]; then
+        if nmcli connection add type bridge con-name "$2" ifname "$1" autoconnect yes stp yes ipv4.method manual ipv4.addresses $3/24 ipv6.method disabled > /dev/null; then
+                echo "[ NMCLI.BR ] Se ha creado el device $1 con éxito ✅";
+        else
+                echo "[ NMCLI.BR ] ERROR: Ha ocurrido un error intentando crear el device/connection $1 ❌";
+                echo;
+                exit 1;
+        fi
+else
+        echo "[ NMCLI.BR ] El bridge o la conexion ya existe, por favor usa primero clean si quiere volver a configurarlo ⚠️";
+fi
+
+
+if [ `cat /etc/qemu/bridge.conf | grep -c "allow $1"` != '1' ]; then
+        echo;
+        echo "[ NMCLI.BR ] Escribiendo en bridge.conf permisos...";
+        echo "allow $1" >> /etc/qemu/bridge.conf;
+fi
+
