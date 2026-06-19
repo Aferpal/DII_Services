@@ -7,12 +7,11 @@
 #include<stdlib.h>
 #include<hb_master_types.h>
 #include<heartbeat_master.h>
+#include<time.h>
 
 port_t listen_port;
 
-hypervisor_status_list_t hyperv_list = {
-	.size = 0
-};
+hypervisor_status_list_t hyperv_list;
 
 void*
 attend_incoming_nodes(void* p)
@@ -57,7 +56,7 @@ attend_incoming_nodes(void* p)
 			continue;
 		}
 		
-		hyperv_list_append(&hyperv_list, hb_response.id);
+		hyperv_list_append(&hyperv_list, hb_response.hypervisor_id);
 
 		close_socket(&incoming);
 
@@ -70,6 +69,19 @@ void*
 timestamp_checker(void* p)
 {
 	while (1) {
+		
+		hyperv_list_lock(&hyperv_list);
+
+		int64_t now = time(NULL);
+
+		for (int i = 0; i < hyperv_list.size; i++){
+			if ( hyperv_list.data[i].status == ON && ((now - hyperv_list.data[i].last_timestamp) > (TIMEOUT_SECONDS * MAX_MISSING_HEARTBEATS))) {
+				/* Here send message outside or act */
+				hyperv_list.data[i].status = OFF;
+			}
+		}
+
+		hyperv_list_unlock(&hyperv_list);
 
 		sleep(CHECK_TIMEOUT);
 	}
@@ -78,7 +90,10 @@ timestamp_checker(void* p)
 
 int
 main(void)
-{
+{	
+	if (hyperv_list_init(&hyperv_list) != HYPERV_LIST_SUCCESS) {
+		return -1;
+	}
 	
 	if (get_port_env(&listen_port) != HB_SUCCESS) {
 		return -1;
@@ -89,6 +104,12 @@ main(void)
 	pthread_create(&listener_thread, NULL, &attend_incoming_nodes, NULL);
 
 	pthread_detach(listener_thread);
+
+	pthread_t checker_thread;
+
+	pthread_create(&checker_thread, NULL, &timestamp_checker, NULL);
+
+	pthread_detach(checker_thread);
 	
 	
 	sock_info_t sock_udp;
@@ -98,10 +119,11 @@ main(void)
 	heartbeat_info_t hb_rec;
 
 	while (1) {
+
 		if (receive_packet(&sock_udp, (void*) &hb_rec, sizeof(hb_rec)) != HB_NET_SUCCESS) {
 			sleep(5);
+			continue;
 		}
-
 		hyperv_list_update_timestamp(&hyperv_list, hb_rec.hypervisor_id, hb_rec.timestamp);
 
 	}
