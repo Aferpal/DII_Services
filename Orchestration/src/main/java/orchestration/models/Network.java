@@ -14,7 +14,7 @@ public class Network {
     public String name;
     public Integer owner;
 
-    @OneToMany(mappedBy = "network_id")
+    @OneToMany(mappedBy = "network")
     public List<VMNetwork> vms;
 
     public Network(){}

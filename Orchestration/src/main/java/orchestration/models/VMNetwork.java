@@ -17,11 +17,18 @@ public class VMNetwork {
     @ManyToOne
     @MapsId("network_id")
     @JoinColumn(name = "network_id")
-    public Network network_id;
+    public Network network;
 
     public String MAC;
 
     public VMNetwork(){}
+
+    public VMNetwork(VM vm, Network network, String MAC) {
+        this.id = new VMNetworkID(vm.getId(), network.getId());
+        this.vm = vm;
+        this.network = network;
+        this.MAC = MAC;
+    }
 
     public VM getVm() {
         return vm;
@@ -31,12 +38,12 @@ public class VMNetwork {
         this.vm = vm;
     }
 
-    public Network getNetwork_id() {
-        return network_id;
+    public Network getNetwork() {
+        return network;
     }
 
-    public void setNetwork_id(Network network_id) {
-        this.network_id = network_id;
+    public void setNetwork(Network network) {
+        this.network = network;
     }
 
     public String getMAC() {

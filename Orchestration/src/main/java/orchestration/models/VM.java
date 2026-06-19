@@ -8,7 +8,8 @@ import java.util.List;
 @Entity
 public class VM {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private Integer cpu;
     private Integer memory;
@@ -21,14 +22,15 @@ public class VM {
 
     @ManyToMany
     @JoinTable(name = "VM_HAS_VOLUME",
-        joinColumns = @JoinColumn(name = "vm_id"),
+            joinColumns = @JoinColumn(name = "vm_id"),
             inverseJoinColumns = @JoinColumn(name = "volume_id")
     )
     public List<Volume> volumes;
 
-    public VM(){}
+    public VM() {
+    }
 
-    public VM(VMNewDTO vm_data){
+    public VM(VMNewDTO vm_data) {
         this.cpu = vm_data.getCpu();
         this.memory = vm_data.getMemory();
         this.owner = vm_data.getOwner();
@@ -80,5 +82,13 @@ public class VM {
 
     public void setStatus(Character status) {
         this.status = status;
+    }
+
+    public List<VMNetwork> getNetworks() {
+        return networks;
+    }
+
+    public List<Volume> getVolumes() {
+        return volumes;
     }
 }

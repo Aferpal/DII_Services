@@ -8,6 +8,29 @@ public class VMNetworkID {
     private Integer vm_id;
     private Integer network_id;
 
+    public VMNetworkID(){}
+
+    public VMNetworkID(Integer vm_id, Integer network_id) {
+        this.vm_id = vm_id;
+        this.network_id = network_id;
+    }
+
+    public Integer getVm_id() {
+        return vm_id;
+    }
+
+    public void setVm_id(Integer vm_id) {
+        this.vm_id = vm_id;
+    }
+
+    public Integer getNetwork_id() {
+        return network_id;
+    }
+
+    public void setNetwork_id(Integer network_id) {
+        this.network_id = network_id;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

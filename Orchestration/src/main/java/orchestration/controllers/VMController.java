@@ -1,7 +1,9 @@
 package orchestration.controllers;
 
 import orchestration.DTOs.VMDTO;
+import orchestration.DTOs.VMNetworkDTO;
 import orchestration.DTOs.VMNewDTO;
+import orchestration.DTOs.VMVolumeDTO;
 import orchestration.services.VMManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,5 +31,17 @@ public class VMController {
         return service.createVM(body)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.badRequest().build());
+    }
+
+    @PutMapping("addVolume")
+    public ResponseEntity<VMDTO> addVolume(@RequestBody VMVolumeDTO allocation){
+        return service.addVolumeToVM(allocation)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.badRequest().build());
+    }
+
+    @PutMapping("addNetwork")
+    public ResponseEntity<VMDTO> addNetwork(@RequestBody VMNetworkDTO allocation){
+        return ResponseEntity.ok(service.addNetworkToVM(allocation));
     }
 }
