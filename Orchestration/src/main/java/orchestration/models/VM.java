@@ -1,6 +1,7 @@
 package orchestration.models;
 
 import jakarta.persistence.*;
+import orchestration.DTOs.VMNewDTO;
 
 import java.util.List;
 
@@ -26,6 +27,12 @@ public class VM {
     public List<Volume> volumes;
 
     public VM(){}
+
+    public VM(VMNewDTO vm_data){
+        this.cpu = vm_data.getCPU();
+        this.memory = vm_data.getMemory();
+        this.owner = vm_data.getOwner();
+    }
 
     public Integer getId() {
         return id;

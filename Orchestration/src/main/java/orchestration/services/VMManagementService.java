@@ -1,5 +1,7 @@
 package orchestration.services;
 
+import jakarta.transaction.Transactional;
+import orchestration.DTOs.*;
 import orchestration.models.Network;
 import orchestration.models.VM;
 import orchestration.models.Volume;
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class VMManagementService {
@@ -36,5 +39,35 @@ public class VMManagementService {
         return volumeRepository.findByOwner(user_id);
     }
 
+    public Optional<VMDTO> createVM(VMNewDTO vm_data){
+        VM newVM = new VM(vm_data);
+        return Optional.of(VMDTO.of(vmRepository.save(newVM)));
+    }
+
+    @Transactional
+    public Optional<NetworkDTO> createNetwork(NetworkNewDTO network_data){
+        Network newNetwork = new Network(network_data);
+        Optional<NetworkDTO> result = Optional.of(NetworkDTO.of(networkRepository.save(newNetwork)));
+
+        /*
+        * Aquí tenemos que llamar al servicio de los hipervisores para que en efecto cree la red
+        * Si fallase, lanzamos una excepción para cancelar la transacción
+        */
+
+        return result;
+    }
+
+    @Transactional
+    public Optional<VolumeDTO> createVolume(VolumeNewDTO volume_data){
+        Volume newVolume = new Volume(volume_data);
+        Optional<VolumeDTO> result = Optional.of(VolumeDTO.of(volumeRepository.save(newVolume)));
+
+        /*
+        * Aquí tenemos que llamar al servicio del target para verdaderamente crear el volumen
+        * Si fallase, lanzamos una excepción para cancelar la transacción
+        */
+
+        return result;
+    }
 
 }

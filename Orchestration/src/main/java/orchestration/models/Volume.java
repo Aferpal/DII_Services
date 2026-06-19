@@ -1,6 +1,7 @@
 package orchestration.models;
 
 import jakarta.persistence.*;
+import orchestration.DTOs.VolumeNewDTO;
 
 import java.util.List;
 
@@ -18,6 +19,12 @@ public class Volume {
     private List<VM> vms;
 
     public Volume(){}
+
+    public Volume(VolumeNewDTO volume_data){
+        this.storage_size_kbytes = volume_data.getSize();
+        this.name = volume_data.getName();
+        this.owner = volume_data.getOwner();
+    }
 
     public Integer getId() {
         return id;

@@ -1,6 +1,7 @@
 package orchestration.models;
 
 import jakarta.persistence.*;
+import orchestration.DTOs.NetworkNewDTO;
 
 import java.util.List;
 
@@ -17,6 +18,11 @@ public class Network {
     public List<VMNetwork> vms;
 
     public Network(){}
+
+    public Network(NetworkNewDTO network_data){
+        this.name = network_data.getName();
+        this.owner = network_data.getOwner();
+    }
 
     public Integer getId() {
         return id;
