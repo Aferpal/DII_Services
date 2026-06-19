@@ -5,7 +5,7 @@ import orchestration.models.VM;
 public class VMDTO {
     private Integer id;
     private Integer owner;
-    private Integer CPU;
+    private Integer cpu;
     private Integer memory;
 
     public VMDTO(){}
@@ -13,7 +13,7 @@ public class VMDTO {
     public VMDTO(Integer id, Integer owner, Integer CPU, Integer memory) {
         this.id = id;
         this.owner = owner;
-        this.CPU = CPU;
+        this.cpu = CPU;
         this.memory = memory;
     }
 
@@ -37,12 +37,12 @@ public class VMDTO {
         this.owner = owner;
     }
 
-    public Integer getCPU() {
-        return CPU;
+    public Integer getCpu() {
+        return cpu;
     }
 
-    public void setCPU(Integer CPU) {
-        this.CPU = CPU;
+    public void setCpu(Integer cpu) {
+        this.cpu = cpu;
     }
 
     public Integer getMemory() {

@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 public class VMNetwork {
 
     @EmbeddedId
-    private VMNetworkdID id;
+    private VMNetworkID id;
 
     @ManyToOne
     @MapsId("vm_id")

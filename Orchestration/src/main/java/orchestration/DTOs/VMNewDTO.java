@@ -2,7 +2,7 @@ package orchestration.DTOs;
 
 public class VMNewDTO {
     private Integer owner;
-    private Integer CPU;
+    private Integer cpu;
     private Integer memory;
 
     public VMNewDTO(){}
@@ -15,12 +15,12 @@ public class VMNewDTO {
         this.owner = owner;
     }
 
-    public Integer getCPU() {
-        return CPU;
+    public Integer getCpu() {
+        return cpu;
     }
 
-    public void setCPU(Integer CPU) {
-        this.CPU = CPU;
+    public void setCpu(Integer cpu) {
+        this.cpu = cpu;
     }
 
     public Integer getMemory() {

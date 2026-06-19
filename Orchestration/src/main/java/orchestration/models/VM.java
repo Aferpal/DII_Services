@@ -29,7 +29,7 @@ public class VM {
     public VM(){}
 
     public VM(VMNewDTO vm_data){
-        this.cpu = vm_data.getCPU();
+        this.cpu = vm_data.getCpu();
         this.memory = vm_data.getMemory();
         this.owner = vm_data.getOwner();
     }
