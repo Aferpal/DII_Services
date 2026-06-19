@@ -41,4 +41,4 @@ run_node:
 	$(OUT_DIR)/$(TARGET_NODE)
 
 run_master:
-	$(OUT_DIR)/$(TARGET_NODE)
+	$(OUT_DIR)/$(TARGET_MASTER)

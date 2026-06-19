@@ -5,7 +5,6 @@
 #include<net_utils.h>
 #include<hb_net.h>
 
-
 hb_net_status_t
 init_sock(sock_info_t* sock, ip_t ip, port_t port, socket_prot_e type)
 {
@@ -137,8 +136,9 @@ accept_socket(const sock_info_t *sock, sock_info_t* incoming)
 	}
 
 	struct sockaddr_in incoming_addr;
+	socklen_t socklen = sizeof(incoming_addr);
 
-	incoming->fd = accept(sock->fd, (struct sockaddr*)&incoming_addr, NULL);
+	incoming->fd = accept(sock->fd, (struct sockaddr*)&incoming_addr, &socklen);
 
 	if (incoming->fd == -1) {
 		return HB_NET_FAILURE;
