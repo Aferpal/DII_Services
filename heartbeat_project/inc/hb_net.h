@@ -22,7 +22,14 @@ hb_net_status_t connect_socket(const sock_info_t *sock, ip_t ip, port_t port);
 hb_net_status_t connect_socket_str_ip(const sock_info_t *sock, const char* ip, port_t port);
 
 
-hb_net_status_t send_packet(const sock_info_t *sock, const void* buf, size_t len, ip_t ip, port_t port);
+hb_net_status_t listen_socket(const sock_info_t *sock);
+
+hb_net_status_t accept_socket(const sock_info_t *sock, sock_info_t* incoming);
+
+
+hb_net_status_t send_packet_to(const sock_info_t *sock, const void* buf, size_t len, ip_t ip, port_t port);
+
+hb_net_status_t send_packet(const sock_info_t* sock, const void* buf, size_t len);
 
 hb_net_status_t receive_packet(const sock_info_t *sock, void* buf, size_t len);
 

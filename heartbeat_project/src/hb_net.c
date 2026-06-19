@@ -23,7 +23,7 @@ init_sock(sock_info_t* sock, ip_t ip, port_t port, socket_prot_e type)
 
 	}
 
-	struct sockaddr_in addr = {AF_INET, toHex(port), ip};
+	struct sockaddr_in addr = {AF_INET, toHex(port), {ip}};
 
 	if (bind(sock->fd, (const struct sockaddr*) &addr, sizeof(addr)) == -1) {
 		// LOG("[ ERROR ] Failure in socket() call: %s", strerr(errno));
@@ -89,7 +89,7 @@ connect_socket(const sock_info_t *sock, ip_t ip, port_t port)
 		return HB_NET_NULL_PARAMS;
 	}
 
-	struct sockaddr_in addr = {AF_INET, toHex(port), ip};
+	struct sockaddr_in addr = {AF_INET, toHex(port), {ip}};
 
 	if (connect(sock->fd, (const struct sockaddr*) &addr, sizeof(addr)) == -1) {
 		return HB_NET_FAILURE;
@@ -115,19 +115,70 @@ connect_socket_str_ip(const sock_info_t *sock, const char* ip, port_t port)
 
 }
 
+hb_net_status_t
+listen_socket(const sock_info_t *sock)
+{
+	if (sock == NULL) {
+		return HB_NET_NULL_PARAMS;
+	}
+
+	if (listen(sock->fd, 5) == -1) {
+		return HB_NET_FAILURE;
+	}
+
+	return HB_NET_SUCCESS;
+}
 
 hb_net_status_t
-send_packet(const sock_info_t *sock, const void* buf, size_t len, ip_t ip, port_t port)
+accept_socket(const sock_info_t *sock, sock_info_t* incoming)
+{
+	if (sock == NULL || incoming == NULL) {
+		return HB_NET_NULL_PARAMS;
+	}
+
+	struct sockaddr_in incoming_addr;
+
+	incoming->fd = accept(sock->fd, (struct sockaddr*)&incoming_addr, NULL);
+
+	if (incoming->fd == -1) {
+		return HB_NET_FAILURE;
+	}
+
+	incoming->ip = incoming_addr.sin_addr.s_addr;
+	incoming->port = incoming_addr.sin_port;
+
+	return HB_NET_SUCCESS;
+}
+
+
+hb_net_status_t
+send_packet_to(const sock_info_t *sock, const void* buf, size_t len, ip_t ip, port_t port)
 {
 	if (sock == NULL || buf == NULL) {
 		return HB_NET_NULL_PARAMS;
 	}
 
-	struct sockaddr_in addr = {AF_INET, toHex(port), ip};
+	struct sockaddr_in addr = {AF_INET, toHex(port), {ip}};
 
 	int res = sendto(sock->fd, buf, len, 0, (const struct sockaddr*) &addr, sizeof(addr));
 	
 	if (res == -1) {
+		return HB_NET_FAILURE;
+	}
+
+	return HB_NET_SUCCESS;
+
+}
+
+hb_net_status_t
+send_packet(const sock_info_t* sock, const void *buf, size_t len)
+{
+	if (sock == NULL || buf == NULL) {
+		return HB_NET_NULL_PARAMS;
+	}
+
+
+	if (send(sock->fd, buf, len, 0) == -1) {
 		return HB_NET_FAILURE;
 	}
 
