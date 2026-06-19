@@ -6,7 +6,7 @@ CINCLUDE=-I./inc
 
 CLINK=
 
-COPTIONS=-O2 $(CINCLUDE)
+COPTIONS=-static -O2 $(CINCLUDE)
 
 SRC_DIR=./src
 
@@ -14,20 +14,31 @@ OUT_DIR=./out
 
 OBJ_DIR=./obj
 
-TARGET=app
+TARGET_MASTER=master
 
-OBJ_LIST=$(OBJ_DIR)/hb_net.o $(OBJ_DIR)/net_utils.o $(OBJ_DIR)/heartbeat_node.o
+TARGET_NODE=node
+
+OBJ_LIST_NODE=$(OBJ_DIR)/hb_net.o $(OBJ_DIR)/net_utils.o $(OBJ_DIR)/heartbeat_node.o
+
+OBJ_LIST_MASTER=$(OBJ_DIR)/hb_net.o $(OBJ_DIR)/net_utils.o
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	mkdir -p $(OBJ_DIR)
 	$(CC) $(CFLAGS) $(COPTIONS) -c $< -o $@ $(CLINK)
 
-build: $(OBJ_LIST)
+build_node: $(OBJ_LIST_NODE)
 	mkdir -p $(OUT_DIR)
-	$(CC) $(CFLAGS) $(COPTIONS) $(OBJ_LIST) main.c -o $(OUT_DIR)/$(TARGET) $(CLINK)
+	$(CC) $(CFLAGS) $(COPTIONS) $(OBJ_LIST_NODE) node_main.c -o $(OUT_DIR)/$(TARGET_NODE) $(CLINK)
+
+build_master: $(OBJ_LIST_MASTER)
+	mkdir -p $(OUT_DIR)
+	$(CC) $(CFLAGS) $(COPTIONS) $(OBJ_LIST_MASTER) master_main.c -o $(OUT_DIR)/$(TARGET_MASTER) $(CLINK)
 
 clean:
 	rm -f $(OUT_DIR)/*
 	rm -f $(OBJ_DIR)/*
-run:
-	$(OUT_DIR)/$(TARGET)
+run_node:
+	$(OUT_DIR)/$(TARGET_NODE)
+
+run_master:
+	$(OUT_DIR)/$(TARGET_NODE)

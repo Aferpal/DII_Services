@@ -90,7 +90,7 @@ init_hb_info_with_master(const master_info_t *m_info, heartbeat_info_t* hb_info)
 		return HB_FAILURE;
 	}
 
-	if (receive_packet(&sock_tcp, (void*) hb_info, sizeof(hb_info)) != HB_NET_SUCCESS) {
+	if (receive_packet(&sock_tcp, (void*) hb_info, sizeof((*hb_info))) != HB_NET_SUCCESS) {
 		return HB_FAILURE;
 	}
 
