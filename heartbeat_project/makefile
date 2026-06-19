@@ -20,7 +20,7 @@ TARGET_NODE=node
 
 OBJ_LIST_NODE=$(OBJ_DIR)/hb_net.o $(OBJ_DIR)/net_utils.o $(OBJ_DIR)/heartbeat_node.o
 
-OBJ_LIST_MASTER=$(OBJ_DIR)/hb_net.o $(OBJ_DIR)/net_utils.o
+OBJ_LIST_MASTER=$(OBJ_DIR)/hb_net.o $(OBJ_DIR)/net_utils.o $(OBJ_DIR)/heartbeat_master.o
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	mkdir -p $(OBJ_DIR)
