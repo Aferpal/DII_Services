@@ -3,7 +3,6 @@ package orchestration.DTOs;
 public class VMNetworkDTO {
     private Integer vm_id;
     private Integer network_id;
-    private String MAC;
     private Integer owner;
 
     public VMNetworkDTO(){}
@@ -22,14 +21,6 @@ public class VMNetworkDTO {
 
     public void setNetwork_id(Integer network_id) {
         this.network_id = network_id;
-    }
-
-    public String getMAC() {
-        return MAC;
-    }
-
-    public void setMAC(String MAC) {
-        this.MAC = MAC;
     }
 
     public Integer getOwner() {

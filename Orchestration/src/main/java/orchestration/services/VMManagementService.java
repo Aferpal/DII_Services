@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 public class VMManagementService {
@@ -111,7 +112,24 @@ public class VMManagementService {
             throw new MismatchingOwnerException("The VM or the volume does does not belong to specified owner");
         }
 
-        VMNetwork relation = new VMNetwork(vm.get(), network.get(), allocation.getMAC());
+        // Generate random MAC for our connection
+        Random rand = new Random();
+        byte[] MAC = new byte[6];
+        rand.nextBytes(MAC);
+
+        // Ensure valid MAC
+        MAC[0] = (byte) (MAC[0] | 0x02);  // Locally administered
+        MAC[0] = (byte) (MAC[0] & 0xfe);  // Unicast
+
+        StringBuilder macString = new StringBuilder();
+        for (byte b : MAC){
+            if (!macString.isEmpty()){
+                macString.append(":");
+            }
+            macString.append(String.format("%02x", b));
+        }
+
+        VMNetwork relation = new VMNetwork(vm.get(), network.get(), macString.toString());
         vmNetworkRepository.save(relation);
         return VMDTO.of(vmRepository.findById(allocation.getVm_id()).get());
     }
