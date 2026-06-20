@@ -1,8 +1,8 @@
-package orchestration.DTOs;
+package clientapi.DTOs;
 
+import clientapi.models.Volume;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import orchestration.models.VM;
-import orchestration.models.Volume;
+
 import java.util.List;
 
 @JsonPropertyOrder({"id", "owner", "cpu", "memory", "volumes", "networks"})
@@ -15,19 +15,6 @@ public class VMDTO {
     private List<NetAllocationDTO> networks;
 
     public VMDTO(){}
-
-    public VMDTO(Integer id, Integer owner, Integer CPU, Integer memory, List<Volume> volumes, List<NetAllocationDTO> networks) {
-        this.id = id;
-        this.owner = owner;
-        this.cpu = CPU;
-        this.memory = memory;
-        this.volumes = volumes;
-        this.networks = networks;
-    }
-
-    public static VMDTO of(VM vm){
-        return new VMDTO(vm.getId(), vm.getOwner(), vm.getCpu(), vm.getMemory(), vm.getVolumes(), vm.getNetworks().stream().map(NetAllocationDTO::of).toList());
-    }
 
     public Integer getId() {
         return id;
