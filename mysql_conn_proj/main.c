@@ -30,10 +30,10 @@ main(void)
 	
 	err = mysql_real_connect(
 		&db_connection,
-		"?.?.?.?",
-		"?",
-		"?",
-		"?",
+		"10.0.2.2",
+		"diicloud_develop",
+		"cloud2526",
+		"DII_CLOUD",
 		3306,
 		NULL,
 		0

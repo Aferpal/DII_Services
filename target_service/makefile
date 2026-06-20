@@ -1,10 +1,10 @@
 CC=gcc
 
-CFLAGS=-Wall
+CFLAGS=-Wall -static
 
-CINCLUDE=-I./inc $(shell pkg-config --static --cflags libmariadb)
+CINCLUDE=-I./inc $(shell pkg-config --static --cflags libmicrohttpd)
 
-CLINK=$(shell pkg-config --static --libs libmariadb)
+CLINK=$(shell pkg-config --static --libs libmicrohttpd)
 
 COPTIONS=-O2 $(CINCLUDE)
 

@@ -13,7 +13,7 @@
 
 #define DB_CONN_BAD_PARAMS 4 
 
-typedef uint32_t db_conn_result_t
+typedef uint32_t db_conn_result_t;
 
 typedef struct db_conn_config db_conn_config_t;
 
@@ -31,6 +31,6 @@ struct db_conn_config {
 };
 
 
-db_conn_result_t read_config_from_env(const db_connection_config_t *);
+db_conn_result_t read_config_from_env(const db_conn_config_t *);
 
 #endif

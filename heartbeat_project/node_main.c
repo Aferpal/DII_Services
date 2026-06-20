@@ -11,14 +11,12 @@ main(void)
 	master_info_t m_info;
 
 	if (init_master_config_default(&m_info) != HB_SUCCESS) {
-		printf("Error leyendo la configuración por defecto de master\n");
 		return -1;
 	} 
 
 	heartbeat_info_t hb_info;
 
 	if (init_hb_info_with_master(&m_info, &hb_info) != HB_SUCCESS) {
-		printf("error iniciando el hb con master\n");
 		return -1;
 	}
 
