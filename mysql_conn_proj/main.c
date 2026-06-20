@@ -28,6 +28,12 @@ main(void)
 
 	mysql_init(&db_connection);
 	
+	my_bool verify = 0;
+
+	mysql_optionsv(&db_connection,
+			MYSQL_OPT_SSL_VERIFY_SERVER_CERT,
+			&verify);
+
 	err = mysql_real_connect(
 		&db_connection,
 		"10.0.2.2",

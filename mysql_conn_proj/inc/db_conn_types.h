@@ -1,5 +1,5 @@
 #ifndef _DB_CONN_TYPES_H_
-#define _DB_CONN_TYPES_H
+#define _DB_CONN_TYPES_H_
 
 #include<stdint.h>
 

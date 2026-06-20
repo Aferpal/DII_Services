@@ -116,6 +116,7 @@ ssh_dii_disconnect(ssh_connection_t* conn)
 	ssh_disconnect(conn->session);
 	ssh_free(conn->session);
 	conn->session = NULL;
+	free(conn);
 	return SSH_SUCCESS;
 }
 
