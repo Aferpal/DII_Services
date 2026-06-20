@@ -2,9 +2,9 @@ CC=gcc
 
 CFLAGS=-Wall
 
-CINCLUDE=-I./inc $(shell pkg-config --cflags libmicrohttpd)
+CINCLUDE=-I./inc $(shell pkg-config --cflags libssh)
 
-CLINK=$(shell pkg-config --libs libmicrohttpd)
+CLINK=$(shell pkg-config --libs libssh)
 
 COPTIONS=-O2 $(CINCLUDE)
 
@@ -16,7 +16,7 @@ OBJ_DIR=./obj
 
 TARGET=app
 
-OBJ_LIST=
+OBJ_LIST=$(OBJ_DIR)/ssh_service.o
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	mkdir -p $(OBJ_DIR)
