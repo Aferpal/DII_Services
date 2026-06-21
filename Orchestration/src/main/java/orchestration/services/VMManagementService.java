@@ -50,7 +50,14 @@ public class VMManagementService {
 
     public Optional<VMDTO> createVM(VMNewDTO vm_data){
         VM newVM = new VM(vm_data);
-        return Optional.of(VMDTO.of(vmRepository.save(newVM)));
+        Optional<VMDTO> result = Optional.of(VMDTO.of(vmRepository.save(newVM)));
+
+        /*
+        * Aquí tenemos que llamar al servicio de los hipervisores para que se lance la máquina virtual
+        * Si fallase, habría que notificar al cliente, viendo si el problema ha sido nuestro o de la definición de la máquina
+        */
+
+        return result;
     }
 
     @Transactional
