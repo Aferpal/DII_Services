@@ -2,21 +2,23 @@ CC=gcc
 
 CFLAGS=-Wall
 
-CINCLUDE=-I./inc $(shell pkg-config --cflags libmicrohttpd)
+CINCLUDE=-I./inc -I../../core/db_conn_lib/inc $(shell pkg-config --cflags libmicrohttpd)
 
-CLINK=$(shell pkg-config --libs libmicrohttpd)
+CLINK=-L../../build/lib -ldbconndii $(shell pkg-config --libs libmicrohttpd) $(shell pkg-config --libs libmariadb) 
 
 COPTIONS=-O2 $(CINCLUDE)
 
 SRC_DIR=./src
 
-OUT_DIR=./out
+BUILD_DIR=../../build
 
-OBJ_DIR=./obj
+OUT_DIR=$(BUILD_DIR)/bin
 
-TARGET=app
+OBJ_DIR=$(BUILD_DIR)/obj/target
 
-OBJ_LIST=
+TARGET=target_service
+
+OBJ_LIST=$(OBJ_DIR)/db_dii.o
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	mkdir -p $(OBJ_DIR)

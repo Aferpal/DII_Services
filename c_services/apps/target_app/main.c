@@ -4,13 +4,25 @@
 #include <string.h>
 #include <microhttpd.h>
 #include<stdio.h>
+#include<stdlib.h>
+#include"db_dii.h"
 
-#define PORT 8888
+#define PORT_ENV "TARGET_HTTP_PORT"
+
+db_dii_connection_t* db;
 
 void
 create_volume(int id)
 {
 	/* Look in the database for the volume */
+	volume_t volume;
+	if (get_volume_by_id(db, id, &volume) != DB_DII_SUCCESS) {
+		printf("Error intentando recuperar el volumen %d\n", id);
+		return;
+	}
+
+	printf("El volume %d se llama %s y tiene %dkb\n", volume.id, volume.name, volume.size_kb);
+
 	/* Do the ssh to the machine with the info */
 }
 
@@ -27,6 +39,7 @@ connection_handler (void *cls, struct MHD_Connection *connection,
 	
 	const char *prefix = "/volume/";
 	if (strncmp(url, prefix, strlen(prefix)) != 0) {
+		printf("Hemos recibido una ruta incorrecta: %s\n", url);
 		return MHD_NO;
 	}
 	
@@ -35,7 +48,6 @@ connection_handler (void *cls, struct MHD_Connection *connection,
 
 	create_volume(id);
 
-	struct MHD_Response *response;
 	enum MHD_Result ret;
 	const char *response_text = "OK\n";
 
@@ -50,9 +62,27 @@ connection_handler (void *cls, struct MHD_Connection *connection,
 int
 main (void)
 {
+
+	db = init_db_dii();
+
+	if (db == NULL) {
+		printf("Error conectando con la base de datos\n");
+		return -1;
+	}
+
+	const char* port = getenv(PORT_ENV);
+
+	if (port == NULL) {
+		close_db_dii(db);
+		printf("Error, no está definido el puerto\n");
+		return -1;
+	}
+
+	int p_n = atoi(port);
+
 	struct MHD_Daemon *daemon;
 	daemon = MHD_start_daemon (MHD_USE_AUTO | MHD_USE_INTERNAL_POLLING_THREAD,
-	PORT, NULL, NULL,
+	p_n, NULL, NULL,
 	&connection_handler, NULL, MHD_OPTION_END);
 	
 	if (NULL == daemon) {
@@ -60,6 +90,8 @@ main (void)
 	}
 	
 	(void) getchar ();
+
 	MHD_stop_daemon (daemon);
+	close_db_dii(db);
 	return 0;
 }
