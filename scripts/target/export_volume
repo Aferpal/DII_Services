@@ -1,0 +1,81 @@
+#!/bin/bash
+
+# $1 volume name
+
+# $2 iqn to be exported to
+
+if [ $# -ne 2 ]; then
+	log_error EXPORT_VOLUME "Expected two params but received $#";
+	exit -1;
+fi
+
+if [ ! -e "/dev/$VG_NAME/$1" ]; then
+	log_error EXPORT_VOLUME "Volume $1 does not exist";
+	exit -1;
+fi
+
+if [ `find /sys/kernel/config/target/core -maxdepth 2 -type d -name $1 | wc -l` == '0' ]; then
+	log_info EXPORT_VOLUME "Backstore not found, adding backstore...";
+
+	if targetcli /backstores/block create dev="/dev/$VG_NAME/$1" name="$1"; then
+		log_success EXPORT_VOLUME "Backstore /backstore/block/$1 created"
+	else
+		log_error EXPORT_VOLUME "Unable to create backstore /backstore/block/$1. Exiting"
+		exit -1;
+	fi
+else
+	log_info EXPORT_VOLUME "Backstore already exists, skipping..."
+fi
+
+
+if [ `find /sys/kernel/config/target/iscsi/iqn.2020-01.es.uma.storage:target17-033/tpgt_1/lun -type l -ls | grep $1 | wc -l` == '0' ]; then
+	log_info EXPORT_VOLUME "LUN not found, adding lun...";
+	if targetcli /iscsi/iqn.2020-01.es.uma.storage:target17-033/tpg1/luns create storage_object="/backstores/block/$1"; then
+		log_success EXPORT_VOLUME "LUN created for /backstores/block/$1";
+	else
+		log_error EXPORT_VOLUME "Unable to create LUN. Exiting";	
+		exit -1;
+	fi
+else
+	log_info EXPORT_VOLUME "LUN already exists, skipping..."
+fi
+
+# this weird line is meant to recover the exact lun name that targetcli has given to our backstore
+
+LUN=`targetcli /iscsi/iqn.2020-01.es.uma.storage:target17-033/tpg1/luns ls | grep $1 | awk '{print $2}' | cut -c 4-`
+
+
+if [ ! -d "/sys/kernel/config/target/iscsi/iqn.2020-01.es.uma.storage:target17-033/tpgt_1/acls/$2" ]; then
+	
+	log_info EXPORT_VOLUME "Initiator not found, adding initiator acl...";
+	
+	if targetcli /iscsi/iqn.2020-01.es.uma.storage:target17-033/tpg1/acls create wwn="$2"; then
+		log_success EXPORT_VOLUME "Initiator $2 created and acl initialised";
+	else 
+		log_error EXPORT_VOLUME "Unable to create initiator $2";
+		exit -1;
+	fi
+
+else
+
+	log_info EXPORT_VOLUME "Initiator already exists, skipping..."
+
+fi
+
+
+if [ `find /sys/kernel/config/target/iscsi/iqn.2020-01.es.uma.storage:target17-033/tpgt_1/acls/$2 -type l -ls | awk '{print $13}' | grep "lun_$LUN" | wc -l` == '0' ]; then
+	log_info EXPORT_VOLUME "Exporting $1 to $2...";
+	
+	if targetcli "/iscsi/iqn.2020-01.es.uma.storage:target17-033/tpg1/acls/$2" create mapped_lun=$LUN tpg_lun_or_backstore=$LUN; then
+		log_success EXPORT_VOLUME "Volume $1 successfully exported to $2";
+	else
+		log_error EXPORT_VOLUME "Unable to add LUN $1 to acl of $2. Exiting";
+		exit -1;
+	fi
+
+else
+	log_info EXPORT_VOLUME "Volume already exported. No actions needed";
+
+fi
+
+exit $LUN;

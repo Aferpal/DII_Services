@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# $1 volume name to be removed
+
+if [ $# -ne 1 ]; then
+	log_error REMOVE_VOLUME "Expected one param, received $#. Use example: \033[1;36mremove_volume vol_name\033[0m";
+	exit -1;
+fi
+
+
+if [ ! -e "/dev/$VG_NAME/$1" ]; then
+	log_error REMOVE_VOLUME "Volume $1 does not exist";
+	exit -1;
+fi
+
+
+if lvremove -y "/dev/$VG_NAME/$1" > /dev/null; then
+	log_success REMOVE_VOLUME "Volume $1 successfully removed";
+else
+	log_error REMOVE_VOLUME "An error occurred trying to remove volume \033[1m$1\033[0m";
+fi

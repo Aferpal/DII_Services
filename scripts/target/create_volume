@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# $1 name 
+# $2 size
+
+if [ $# -ne 2 ]; then
+	log_error CREATE_VOLUME "Command has two arguments, volume name and volume size. Example: \033[1;36mcreate_volume mivol 100M \033[0m";
+	exit -1;
+fi
+
+if lvcreate -r auto -L $2 -n $1 $VG_NAME > /dev/null; then
+	log_success CREATE_VOLUME "Volume $1 successfully created with $2";
+else
+	log_error CREATE_VOLUME "An error occurred trying to create volume \033[1m $1 \033[0m with size \033[1m $2 \033[0m";
+fi
