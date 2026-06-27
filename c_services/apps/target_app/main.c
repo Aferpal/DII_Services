@@ -6,24 +6,32 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include"db_dii.h"
+#include"ssh_dii.h"
 
 #define PORT_ENV "TARGET_HTTP_PORT"
 
 db_dii_connection_t* db;
+ssh_dii_connection_t *target;
 
-void
+int
 create_volume(int id)
 {
 	/* Look in the database for the volume */
 	volume_t volume;
 	if (get_volume_by_id(db, id, &volume) != DB_DII_SUCCESS) {
 		printf("Error intentando recuperar el volumen %d\n", id);
-		return;
+		return -1;
 	}
 
 	printf("El volume %d se llama %s y tiene %dkb\n", volume.id, volume.name, volume.size_kb);
 
 	/* Do the ssh to the machine with the info */
+	if (ssh_create_volume(target, &volume) != SSH_DII_SUCCESS) {
+		printf("Error al intentar hacer el ssh\n");
+		return -1;
+	}
+
+	return 0;
 }
 
 static enum MHD_Result
@@ -70,11 +78,18 @@ main (void)
 		return -1;
 	}
 
+	target = init_ssh_dii();
+
+	if (target == NULL) {
+		printf("Error conectando por ssh\n");
+		return -1;
+	}
+
 	const char* port = getenv(PORT_ENV);
 
 	if (port == NULL) {
 		close_db_dii(db);
-		printf("Error, no está definido el puerto\n");
+		printf("Error, no está definido el puerto en la variable %s\n", PORT_ENV);
 		return -1;
 	}
 

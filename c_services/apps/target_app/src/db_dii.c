@@ -15,12 +15,14 @@ init_db_dii()
 	db_dii_connection_t * res = malloc(sizeof(db_dii_connection_t));
 	
 	if (res == NULL) {
+		printf("An error ocurred trying to reserve memory for the connection\n");
 		return res;
 	}
 
 	res->conn = db_dii_connection_new();
 
 	if (res->conn == NULL) {
+		printf("An error ocurred trying to create the connection\n");
 		db_dii_disconnect(res->conn);
 		free(res);
 		return NULL;
@@ -29,6 +31,7 @@ init_db_dii()
 	const char* port = getenv(DB_DII_PORT_ENV);
 
 	if (port == NULL) {
+		printf("Error: DB_DII_PORT env is not defined, unable to connect to db\n");
 		db_dii_disconnect(res->conn);
 		free(res);
 		return NULL;
@@ -40,6 +43,7 @@ init_db_dii()
                                       getenv(DB_DII_PASSWORD_ENV),
                                       getenv(DB_DII_DATABASE_ENV),
                                       atoi(getenv(DB_DII_PORT_ENV))) != DB_SUCCESS ) {
+		printf("Error: Unable to access the db, either env are not defined or are incorrect\n");
 		db_dii_disconnect(res->conn);
 		free(res);
 		return NULL;
