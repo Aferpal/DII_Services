@@ -5,6 +5,7 @@
 #include <microhttpd.h>
 #include<stdio.h>
 #include<stdlib.h>
+#include<signal.h>
 #include"db_dii.h"
 #include"ssh_dii.h"
 
@@ -13,21 +14,26 @@
 db_dii_connection_t* db;
 ssh_dii_connection_t *target;
 
+volatile int running = 1;
+
+void stop(int sig) 
+{
+	running = 0;
+}
+
 int
 create_volume(int id)
 {
 	/* Look in the database for the volume */
 	volume_t volume;
 	if (get_volume_by_id(db, id, &volume) != DB_DII_SUCCESS) {
-		printf("Error intentando recuperar el volumen %d\n", id);
+		printf("[ TARGET_SERVICE ] Error finding volume %d in database\n", id);
 		return -1;
 	}
 
-	printf("El volume %d se llama %s y tiene %dkb\n", volume.id, volume.name, volume.size_kb);
-
 	/* Do the ssh to the machine with the info */
 	if (ssh_create_volume(target, &volume) != SSH_DII_SUCCESS) {
-		printf("Error al intentar hacer el ssh\n");
+		printf("[ TARGET_SERVICE ] Error creating volume %d through ssh\n", id);
 		return -1;
 	}
 
@@ -41,20 +47,28 @@ connection_handler (void *cls, struct MHD_Connection *connection,
 	size_t *upload_data_size, void **req_cls)
 {
 
+	if (*upload_data_size != 0) {
+		    *upload_data_size = 0;
+		        return MHD_YES;
+	}
+	
 	if (strcmp(method, "POST") != 0) {
 		return MHD_NO;
 	}		
 	
 	const char *prefix = "/volume/";
 	if (strncmp(url, prefix, strlen(prefix)) != 0) {
-		printf("Hemos recibido una ruta incorrecta: %s\n", url);
+		printf("[ TARGER_SERVICE ] Bad route, only allowed is /volume/{id}: %s\n", url);
 		return MHD_NO;
 	}
 	
 	const char *id_str = url + strlen(prefix);
 	int id = atoi(id_str);
 
-	create_volume(id);
+	if (create_volume(id) != 0) {
+		printf("[ TARGET_SERVICE ] Volume %d was in db but could not create on ssh target\n", id);
+		return MHD_NO;
+	}
 
 	enum MHD_Result ret;
 	const char *response_text = "OK\n";
@@ -71,32 +85,37 @@ int
 main (void)
 {
 
+	setvbuf(stdout, NULL, _IONBF, 0);
+
 	db = init_db_dii();
 
 	if (db == NULL) {
-		printf("Error conectando con la base de datos\n");
+		printf("[ TARGET_SERVICE ] Error trying to stablish connection with sql database. Check correctness of %s, %s, %s, %s or %s\n", DB_DII_HOSTNAME_ENV, DB_DII_USER_ENV, DB_DII_PASSWORD_ENV, DB_DII_PORT_ENV, DB_DII_DATABASE_ENV);
 		return -1;
 	}
 
 	target = init_ssh_dii();
 
 	if (target == NULL) {
-		printf("Error conectando por ssh\n");
+		printf("[ TARGET_SERVICE ] Error trying to stablish connection via ssh with target, check correctness of %s, %s or %s\n", SSH_TARGET_HOST_ENV, SSH_TARGET_USER_ENV, SSH_TARGET_PASSWORD_ENV);
 		return -1;
 	}
+	
+	signal(SIGTERM, stop);
+	signal(SIGINT, stop);
 
 	const char* port = getenv(PORT_ENV);
 
 	if (port == NULL) {
 		close_db_dii(db);
-		printf("Error, no está definido el puerto en la variable %s\n", PORT_ENV);
+		printf("[ TARGET_SERVICE ] Error: %s is not defined. Exiting...\n", PORT_ENV);
 		return -1;
 	}
 
 	int p_n = atoi(port);
 
 	struct MHD_Daemon *daemon;
-	daemon = MHD_start_daemon (MHD_USE_AUTO | MHD_USE_INTERNAL_POLLING_THREAD,
+	daemon = MHD_start_daemon (MHD_USE_INTERNAL_POLLING_THREAD,
 	p_n, NULL, NULL,
 	&connection_handler, NULL, MHD_OPTION_END);
 	
@@ -104,9 +123,13 @@ main (void)
 		return 1;
 	}
 	
-	(void) getchar ();
+	while(running)
+	{
+
+	}
 
 	MHD_stop_daemon (daemon);
 	close_db_dii(db);
+	printf("[ TARGET_SERVICE ] Program ends\n");
 	return 0;
 }

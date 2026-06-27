@@ -29,7 +29,6 @@ init_ssh_dii()
 	const char* password = getenv(SSH_TARGET_PASSWORD_ENV);
 
 	if (host == NULL || user == NULL || password == NULL) {
-		printf("No están definidas las variables de entorno\n");
 		close_ssh_dii(res);
 		return NULL;
 	}
@@ -38,7 +37,6 @@ init_ssh_dii()
                                       host,
 				      user,
 				      password) != SSH_SUCCESS) {
-		printf("No se ha podido conectar, los env están mal definidos\n");
 		close_ssh_dii(res);
 		return NULL;
 	}
@@ -50,13 +48,11 @@ ssh_dii_status_t
 ssh_dii_exec_command(const ssh_dii_connection_t *ssh, const char* cmd, uint32_t* result)
 {
 	if (ssh == NULL || cmd == NULL || result == NULL) {
-		printf("Null params en dii exec command\n");
 		return SSH_DII_NULL_PARAMS;
 	}
 
 	ssh_result_t res;
 	if (ssh_dii_exec(ssh->conn, cmd, &res) != SSH_SUCCESS) {
-		printf("Fallo al  hacer el ssh dii exec\n");
 		return SSH_DII_FAILURE;
 	}
 
@@ -75,13 +71,11 @@ ssh_create_volume(const ssh_dii_connection_t* ssh, volume_t* vol)
 
 	char command[256] = {0};
 
-	snprintf(command, 256, "/root/bin/create_volume %s %d %dK", vol->name, vol->id, vol->size_kb);
+	snprintf(command, 256, "/root/bin/create_volume %s %dK", vol->name, vol->size_kb);
 	uint32_t res;
 	if (ssh_dii_exec_command(ssh, command, &res) != SSH_DII_SUCCESS) {
-		printf("Error ejecutando el exec de create con %s %d %dK\n", vol->name, vol->id, vol->size_kb);
 		return SSH_DII_FAILURE;
 	}
-
 	return res == 0 ? SSH_DII_SUCCESS : SSH_DII_FAILURE;
 }
 

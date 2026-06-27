@@ -15,14 +15,14 @@ init_db_dii()
 	db_dii_connection_t * res = malloc(sizeof(db_dii_connection_t));
 	
 	if (res == NULL) {
-		printf("An error ocurred trying to reserve memory for the connection\n");
+		printf("[ TARGET_DB ] An error ocurred trying to reserve memory for the connection\n");
 		return res;
 	}
 
 	res->conn = db_dii_connection_new();
 
 	if (res->conn == NULL) {
-		printf("An error ocurred trying to create the connection\n");
+		printf("[ TARGET_DB ] An error ocurred trying to create the connection\n");
 		db_dii_disconnect(res->conn);
 		free(res);
 		return NULL;
@@ -31,7 +31,7 @@ init_db_dii()
 	const char* port = getenv(DB_DII_PORT_ENV);
 
 	if (port == NULL) {
-		printf("Error: DB_DII_PORT env is not defined, unable to connect to db\n");
+		printf("[ TARGET_DB ] Error: DB_DII_PORT env is not defined, unable to connect to db\n");
 		db_dii_disconnect(res->conn);
 		free(res);
 		return NULL;
@@ -43,7 +43,7 @@ init_db_dii()
                                       getenv(DB_DII_PASSWORD_ENV),
                                       getenv(DB_DII_DATABASE_ENV),
                                       atoi(getenv(DB_DII_PORT_ENV))) != DB_SUCCESS ) {
-		printf("Error: Unable to access the db, either env are not defined or are incorrect\n");
+		printf("[ TARGET_DB ] Error: Unable to access the db, either env are not defined or are incorrect\n");
 		db_dii_disconnect(res->conn);
 		free(res);
 		return NULL;
@@ -69,6 +69,7 @@ get_volume_by_id(const db_dii_connection_t *db, uint32_t id, volume_t *vol)
 	if (db_dii_execute_query(db->conn, query, &query_result) != DB_SUCCESS) {
 		return DB_DII_FAILURE;
 	}
+	
 
 	if (query_result.n_rows != 1) {
 		db_dii_free_result(&query_result);
@@ -77,7 +78,7 @@ get_volume_by_id(const db_dii_connection_t *db, uint32_t id, volume_t *vol)
 
 	const char* storage;
 	const char* name;
-
+	fflush(stdout);
 	if (db_dii_get(&query_result, "name", 0, &name) != DB_SUCCESS ||
             db_dii_get(&query_result, "storage_size_kbytes", 0, &storage) != DB_SUCCESS) {
 		db_dii_free_result(&query_result);

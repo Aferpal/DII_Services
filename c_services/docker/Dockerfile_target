@@ -1,0 +1,5 @@
+FROM scratch 
+
+COPY build/docker_fs/ /
+
+ENTRYPOINT ["/app/target_service"]

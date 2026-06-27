@@ -29,7 +29,6 @@ ssh_dii_create_connection(ssh_connection_t* conn,
 	}
 
 	if (strlen(host) >= STR_PARAM_LEN || strlen(user) >= STR_PARAM_LEN) {
-		printf("Error en los nombres\n");
 		return SSH_FAILURE;
 	}
 
@@ -42,21 +41,20 @@ ssh_dii_create_connection(ssh_connection_t* conn,
 	conn->session = ssh_new();
 
 	if (conn->session == NULL) {
-		printf("no se puede crear sesion\n");
 		return SSH_FAILURE;
 	}
 
-	ssh_options_set(conn->session, SSH_OPTIONS_HOST, conn->hostname);
+	int rc=ssh_options_set(conn->session, SSH_OPTIONS_HOST, conn->hostname);
+	rc = ssh_options_set(conn->session, SSH_OPTIONS_USER, conn->user);
 
-	if (ssh_connect(conn->session) != SSH_OK) {
-		printf("No se ha podido conectar\n");
+	rc = ssh_connect(conn->session);
+	if (rc != SSH_OK) {
 		ssh_free(conn->session);
 		conn->session = NULL;
 		return SSH_FAILURE;
 	}
 
 	if (ssh_userauth_password(conn->session, conn->user, password) != SSH_AUTH_SUCCESS) {
-		printf("No se ha podido autenticar\n");
 		ssh_disconnect(conn->session);
 		ssh_free(conn->session);
 		conn->session = NULL;

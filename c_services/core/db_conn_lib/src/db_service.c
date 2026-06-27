@@ -49,7 +49,6 @@ db_status_t db_dii_create_connection(db_connection_t* conn,
 	conn->connection = mysql_init(NULL);
 
 	if (conn->connection == NULL) {
-		printf("Hay un fallo al hacer init\n");
 		return DB_FAILURE;
 	}
 
@@ -67,7 +66,7 @@ db_status_t db_dii_create_connection(db_connection_t* conn,
 			       port,
 			       NULL,
 			       0) == NULL) {
-		printf("Fallo de credenciales: %s\n", mysql_error(conn->connection));
+		printf("[ CORE_DB ] Auth error: %s\n", mysql_error(conn->connection));
 		mysql_close(conn->connection);
 		return DB_FAILURE;
 	}
@@ -157,9 +156,7 @@ db_dii_execute_query(const db_connection_t* conn,
 	result->n_columns = mysql_num_fields(response);
 
 	result->n_rows = mysql_num_rows(response);
-
 	init_db_dii_result(result, result->n_rows, result->n_columns);
-
 	MYSQL_FIELD* fields = mysql_fetch_fields(response);
 	
 	for (int i = 0; i < result->n_columns; i++) {
@@ -178,6 +175,10 @@ db_dii_execute_query(const db_connection_t* conn,
 		}
 
 		for (int j = 0; j < result->n_columns; j++) {
+			if (c_row[j] == NULL) {
+				result->rows[i].columns[j] = NULL;
+				continue;
+			}
 			result->rows[i].columns[j] = strdup(c_row[j]);
 		}
 	}
