@@ -15,4 +15,11 @@ struct hypervisor {
 	char iqn[STR_IQN_LEN];
 };
 
+typedef struct hypervisor_list hypervisor_list_t;
+
+struct hypervisor_list {
+	hypervisor_t data[8];
+	uint32_t size;
+};
+
 #endif

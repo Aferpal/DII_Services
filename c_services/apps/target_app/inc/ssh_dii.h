@@ -5,6 +5,8 @@
 
 #include"db_volumes.h"
 
+#include"db_hypervisor.h"
+
 #define SSH_TARGET_HOST_ENV "SSH_DII_TARGET_HOST"
 
 #define SSH_TARGET_USER_ENV "SSH_DII_TARGET_USER"
@@ -28,6 +30,8 @@ ssh_dii_connection_t *init_ssh_dii();
 ssh_dii_status_t ssh_dii_exec_command(const ssh_dii_connection_t *ssh, const char* cmd, uint32_t* result);
 
 ssh_dii_status_t ssh_create_volume(const ssh_dii_connection_t* ssh, volume_t* vol);
+
+ssh_dii_status_t ssh_export_volume(const ssh_dii_connection_t *ssh, volume_t* vol, hypervisor_t *hypervisor);
 
 ssh_dii_status_t close_ssh_dii(ssh_dii_connection_t *ssh);
 

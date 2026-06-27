@@ -79,6 +79,27 @@ ssh_create_volume(const ssh_dii_connection_t* ssh, volume_t* vol)
 	return res == 0 ? SSH_DII_SUCCESS : SSH_DII_FAILURE;
 }
 
+ssh_dii_status_t
+ssh_export_volume(const ssh_dii_connection_t *ssh, volume_t* vol, hypervisor_t *hypervisor)
+{
+	if (ssh == NULL || vol == NULL || hypervisor == NULL) {
+		return SSH_DII_NULL_PARAMS;
+	}
+
+	char command[256] = {0};
+
+	snprintf(command, 256, "/root/bin/export_volume %s %s %d", vol->name, hypervisor->iqn, vol->id);
+
+	uint32_t res;
+
+	if (ssh_dii_exec_command(ssh, command, &res) != SSH_DII_SUCCESS) {
+		return SSH_DII_FAILURE;
+	}
+	
+	return res == 0 ? SSH_DII_SUCCESS : SSH_DII_FAILURE;
+
+}
+
 
 
 ssh_dii_status_t

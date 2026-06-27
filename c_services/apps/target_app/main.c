@@ -37,6 +37,19 @@ create_volume(int id)
 		return -1;
 	}
 
+	hypervisor_list_t list;
+
+	if (get_all_hypervisors(db, &list) != DB_DII_SUCCESS) {
+		printf("[ TARGET_SERVICE ] Error retrieving hypervisors, unable to export volume, contact administrator\n");
+		return -1;
+	}
+
+	for (int i = 0; i < list.size; i++) {
+		if (ssh_export_volume(target, &volume, &list.data[i]) != SSH_DII_SUCCESS) {
+			printf("[ TARGET_SERVICE ] Errot trying to export volume %d to hypervisor %d\n", volume.id, list.data[i].id);
+		}
+	}
+
 	return 0;
 }
 

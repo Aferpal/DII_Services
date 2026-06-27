@@ -140,6 +140,46 @@ get_hypervisor_by_id(const db_dii_connection_t *db, uint32_t id, hypervisor_t *h
 	return DB_DII_SUCCESS;
 }
 
+db_dii_status_t
+get_all_hypervisors(const db_dii_connection_t *db, hypervisor_list_t *list)
+{
+	if (db == NULL || list == NULL) {
+		return DB_DII_NULL_PARAMS;
+	}
+
+	const char* query = "SELECT * FROM HYPERVISOR";
+
+	db_result_t result;
+
+	if (db_dii_execute_query(db->conn, query, &result) != DB_SUCCESS) {
+		return DB_DII_FAILURE;
+	}
+
+	const char* id;
+	const char* hostname;
+	const char* iqn;
+	list->size = 0;
+	for (int i = 0; i < result.n_rows && i < 8; i++) {
+		if (db_dii_get(&result, "hostname", i, &hostname) != DB_SUCCESS ||
+                    db_dii_get(&result, "iqn", i, &iqn) != DB_SUCCESS ||
+		    db_dii_get(&result, "id", i, &id) != DB_SUCCESS) {
+			db_dii_free_result(&result);
+			return DB_DII_FAILURE;
+		}
+
+		memset(&list->data[i], 0, sizeof(hypervisor_t));
+
+		list->data[i].id = atoi(id);
+		strncpy(list->data[i].hostname, hostname, STR_HOST_LEN  -1);
+		strncpy(list->data[i].iqn, iqn, STR_IQN_LEN - 1);
+		list->size++;
+	}
+
+	db_dii_free_result(&result);
+
+	return DB_DII_SUCCESS;
+}
+
 
 db_dii_status_t
 close_db_dii(db_dii_connection_t* db)
