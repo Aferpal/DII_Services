@@ -4,9 +4,9 @@ CFLAGS=-Wall -Wextra -O2 -ffunction-sections -fdata-sections -flto
 
 LDFLAGS=-Wl,--gc-sections -flto
 
-CINCLUDE=-I./inc -I../../core/db_conn_lib/inc -I../../core/ssh_lib/inc $(shell pkg-config --cflags libmicrohttpd) $(shell pkg-config --cflags libssh)
+CINCLUDE=-I./inc -I../../core/access_lib/inc -I../../core/models $(shell pkg-config --cflags libmicrohttpd)
 
-CLINK=-L../../build/lib -ldbconndii -lsshdii -lmicrohttpd -lssh -lmariadb
+CLINK=-L../../build/lib -laccessdii -ldbconndii -lsshdii -lmicrohttpd -lssh -lmariadb
 
 COPTIONS=$(CINCLUDE)
 
@@ -16,11 +16,15 @@ BUILD_DIR=../../build
 
 OUT_DIR=$(BUILD_DIR)/bin
 
-OBJ_DIR=$(BUILD_DIR)/obj/hyperv
+OBJ_DIR=$(BUILD_DIR)/obj/target
 
-TARGET=hyperv_service
+DOCK_TEMP_DIR=$(BUILD_DIR)/docker_fs/target
 
-OBJ_LIST=$(OBJ_DIR)/db_dii.o $(OBJ_DIR)/ssh_dii.o
+DOCK_IMG_DIR=$(BUILD_DIR)/docker_images
+
+TARGET=target_service
+
+OBJ_LIST=$(OBJ_DIR)/hyperv_connections.o
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	mkdir -p $(OBJ_DIR)
@@ -30,8 +34,24 @@ build: $(OBJ_LIST)
 	mkdir -p $(OUT_DIR)
 	$(CC) $(CFLAGS) $(COPTIONS) $(OBJ_LIST) main.c -o $(OUT_DIR)/$(TARGET) $(CLINK) $(LDFLAGS)
 
+docker: clean build
+	mkdir -p $(DOCK_TEMP_DIR)
+	mkdir -p $(DOCK_TEMP_DIR)/app
+	mkdir -p $(DOCK_TEMP_DIR)/usr/lib
+	mkdir -p $(DOCK_TEMP_DIR)/lib
+	cp $(OUT_DIR)/$(TARGET) $(DOCK_TEMP_DIR)/app/$(TARGET)
+	ldd $(OUT_DIR)/$(TARGET) | awk '{print $$3}' | grep '^/' |\
+		xargs -I{} cp -v {} $(DOCK_TEMP_DIR)/usr/lib/
+	cp /lib/ld-musl-x86_64.so.1 $(DOCK_TEMP_DIR)/lib/
+	docker build -f Dockerfile_target -t target_service:min $(DOCK_TEMP_DIR)
+	mkdir -p $(DOCK_IMG_DIR)
+	docker save -o $(DOCK_IMG_DIR)/$(TARGET).tar target_service:min
+	gzip $(DOCK_IMG_DIR)/$(TARGET).tar
+	rm -rf $(DOCK_TEMP_DIR)
+
 clean:
 	rm -f $(OUT_DIR)/*
 	rm -f $(OBJ_DIR)/*
+	rm -rf $(DOCK_IMG_DIR)
 run:
 	$(OUT_DIR)/$(TARGET)

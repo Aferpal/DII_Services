@@ -31,7 +31,11 @@ db_dii_status_t get_volume_by_id(const db_dii_connection_t *db, uint32_t id, vol
 
 db_dii_status_t get_hypervisor_by_id(const db_dii_connection_t *db, uint32_t id, hypervisor_t *hyperv);
 
+db_dii_status_t get_vm_by_id(const db_dii_connection_t *db, uint32_t id, vm_t *vm);
+
 db_dii_status_t get_all_hypervisors(const db_dii_connection_t *db, hypervisor_list_t *list);
+
+db_dii_status_t get_all_volumes_from_vm_id(const db_dii_connection_t *db, uint32_t id, volume_list_t *list);
 
 db_dii_status_t close_db_dii(db_dii_connection_t* db);
 

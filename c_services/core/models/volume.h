@@ -13,4 +13,11 @@ struct volume {
 	char name[STR_PARAM_LEN];
 };
 
+typedef struct volume_list volume_list_t;
+
+struct volume_list {
+	volume_t data[8];
+	uint32_t size;
+};
+
 #endif

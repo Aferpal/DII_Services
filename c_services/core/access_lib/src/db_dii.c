@@ -99,6 +99,28 @@ get_volume_by_id(const db_dii_connection_t *db, uint32_t id, volume_t *vol)
 }
 
 db_dii_status_t
+get_vm_by_id(const db_dii_connection_t *db, uint32_t id, vm_t *vm)
+{
+	if (db == NULL || vm == NULL) {
+		return DB_DII_NULL_PARAMS;
+	}
+	
+	char query[128] = {0};
+
+	snprintf(query, "SELECT * FROM VM WHERE id = %d", id);
+
+	db_result_t result;
+
+	if (db_dii_execute_query(db, query, &result) != DB_DII_SUCCESS) {
+		return DB_DII_FAILURE;
+	}
+
+	if (result.n_rows != 1) {
+		
+	}
+}
+
+db_dii_status_t
 get_hypervisor_by_id(const db_dii_connection_t *db, uint32_t id, hypervisor_t *hyperv)
 {
 	if (db == NULL || hyperv == NULL) {
@@ -178,6 +200,11 @@ get_all_hypervisors(const db_dii_connection_t *db, hypervisor_list_t *list)
 	db_dii_free_result(&result);
 
 	return DB_DII_SUCCESS;
+}
+
+db_dii_status_t
+get_all_volumes_from_vm_id(const db_dii_connection_t *db, uint32_t id, volume_list_t *list) 
+{
 }
 
 

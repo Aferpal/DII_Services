@@ -25,11 +25,15 @@ typedef struct ssh_dii_connection ssh_dii_connection_t;
 
 ssh_dii_connection_t *init_ssh_dii();
 
+ssh_dii_connection_t *init_ssh_dii_params(const char* host, const char* user, const char* password);
+
 ssh_dii_status_t ssh_dii_exec_command(const ssh_dii_connection_t *ssh, const char* cmd, uint32_t* result);
 
 ssh_dii_status_t ssh_create_volume(const ssh_dii_connection_t* ssh, volume_t* vol);
 
 ssh_dii_status_t ssh_export_volume(const ssh_dii_connection_t *ssh, volume_t* vol, hypervisor_t *hypervisor);
+
+ssh_dii_status_t ssh_create_vm_with_volumes(const ssh_dii_connection_t *ssh, vm_t *vm, volume_list_t *vol_list);
 
 ssh_dii_status_t close_ssh_dii(ssh_dii_connection_t *ssh);
 

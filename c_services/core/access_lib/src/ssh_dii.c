@@ -9,6 +9,38 @@ struct ssh_dii_connection {
 };
 
 ssh_dii_connection_t *
+init_ssh_dii_params(const char* host, const char* user, const char* password)
+{
+	
+	if (host == NULL || user == NULL || password == NULL) {
+		return NULL;
+	}
+
+	ssh_dii_connection_t *res = malloc(sizeof(struct ssh_dii_connection));
+	
+	if (res == NULL) {
+		return NULL;
+	}
+
+	res->conn = ssh_dii_connection_new();
+
+	if (res->conn == NULL) {
+		free(res);
+		return NULL;
+	}
+
+	if (ssh_dii_create_connection(res->conn,
+                                      host,
+				      user,
+				      password) != SSH_SUCCESS) {
+		close_ssh_dii(res);
+		return NULL;
+	}
+
+	return res;
+}
+
+ssh_dii_connection_t *
 init_ssh_dii()
 {
 	ssh_dii_connection_t* res = malloc(sizeof(struct ssh_dii_connection));
