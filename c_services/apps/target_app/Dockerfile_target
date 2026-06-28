@@ -1,5 +1,5 @@
 FROM scratch 
 
-COPY build/docker_fs/ /
+COPY ./ /
 
 ENTRYPOINT ["/app/target_service"]
