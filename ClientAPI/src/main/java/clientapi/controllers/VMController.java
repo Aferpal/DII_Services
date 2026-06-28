@@ -52,4 +52,10 @@ public class VMController {
                 .body(allocation);
         return restTemplate.exchange(request, VMDTO.class);
     }
+
+    @PostMapping("launch/{id}")
+    public ResponseEntity<Void> launchVM(@PathVariable Integer id){
+        RequestEntity<Void> request = RequestEntity.post(baseUrl+"/vms/launch/"+id).build();
+        return restTemplate.exchange(request, Void.class);
+    }
 }

@@ -15,7 +15,10 @@ import orchestration.repositories.VMNetworkRepository;
 import orchestration.repositories.VMRepository;
 import orchestration.repositories.VolumeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.RequestEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,12 +31,21 @@ public class VMManagementService {
     VolumeRepository volumeRepository;
     VMNetworkRepository vmNetworkRepository;
 
+    RestTemplate restTemplate;
+
+    @Value("${vmServiceUrl}")
+    String vmServiceUrl;
+
+    @Value("${volumeServiceUrl}")
+    String volumeServiceUrl;
+
     @Autowired
-    public VMManagementService(VMRepository vmRepository, NetworkRepository networkRepository, VolumeRepository volumeRepository, VMNetworkRepository vmNetworkRepository){
+    public VMManagementService(VMRepository vmRepository, NetworkRepository networkRepository, VolumeRepository volumeRepository, VMNetworkRepository vmNetworkRepository, RestTemplate restTemplate){
         this.vmRepository = vmRepository;
         this.networkRepository = networkRepository;
         this.volumeRepository = volumeRepository;
         this.vmNetworkRepository = vmNetworkRepository;
+        this.restTemplate = restTemplate;
     }
 
     public List<VMDTO> getAllUserVMs(Integer user_id){
@@ -51,13 +63,12 @@ public class VMManagementService {
     public Optional<VMDTO> createVM(VMNewDTO vm_data){
         VM newVM = new VM(vm_data);
         Optional<VMDTO> result = Optional.of(VMDTO.of(vmRepository.save(newVM)));
-
-        /*
-        * Aquí tenemos que llamar al servicio de los hipervisores para que se lance la máquina virtual
-        * Si fallase, habría que notificar al cliente, viendo si el problema ha sido nuestro o de la definición de la máquina
-        */
-
         return result;
+    }
+
+    public void launchVM(Integer id){
+        RequestEntity<Void> request = RequestEntity.post(vmServiceUrl+"/vm/"+id).build();
+        restTemplate.exchange(request, Void.class);
     }
 
     @Transactional
@@ -73,15 +84,17 @@ public class VMManagementService {
         return result;
     }
 
-    @Transactional
     public Optional<VolumeDTO> createVolume(VolumeNewDTO volume_data){
         Volume newVolume = new Volume(volume_data);
-        Optional<VolumeDTO> result = Optional.of(VolumeDTO.of(volumeRepository.save(newVolume)));
+        Optional<VolumeDTO> result = Optional.of(VolumeDTO.of(volumeRepository.saveAndFlush(newVolume)));
 
         /*
-        * Aquí tenemos que llamar al servicio del target para verdaderamente crear el volumen
+        * Aquí llamamos al servicio del target para verdaderamente crear el volumen
         * Si fallase, lanzamos una excepción para cancelar la transacción
         */
+
+        RequestEntity<Void> request = RequestEntity.post(volumeServiceUrl+"/volume/"+result.get().getId()).build();
+        restTemplate.exchange(request, Void.class);
 
         return result;
     }

@@ -44,4 +44,10 @@ public class VMController {
     public ResponseEntity<VMDTO> addNetwork(@RequestBody VMNetworkDTO allocation){
         return ResponseEntity.ok(service.addNetworkToVM(allocation));
     }
+
+    @PostMapping("launch/{id}")
+    public ResponseEntity<Void> launchVM(@PathVariable Integer id){
+        service.launchVM(id);
+        return ResponseEntity.ok().build();
+    }
 }
