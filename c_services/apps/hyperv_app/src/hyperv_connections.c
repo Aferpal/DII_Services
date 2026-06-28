@@ -1,6 +1,8 @@
 #include"hyperv_connections.h"
 #include"hypervisor.h"
-
+#include<stddef.h>
+#include<stdlib.h>
+#include<string.h>
 void
 init_hyperv_connections_on_db_data(const db_dii_connection_t *db, hyperv_connections_t *conns)
 {
@@ -17,7 +19,7 @@ init_hyperv_connections_on_db_data(const db_dii_connection_t *db, hyperv_connect
 
 	hypervisor_list_t h_list;
 
-	if (get_all_hypervisors(db, &h_list) != BD_DII_SUCCESS) {
+	if (get_all_hypervisors(db, &h_list) != DB_DII_SUCCESS) {
 		return;
 	}
 

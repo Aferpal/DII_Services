@@ -141,12 +141,12 @@ ssh_create_vm_with_volumes(const ssh_dii_connection_t *ssh, vm_t *vm, volume_lis
 
 	char command[512] = {0};
 
-	snprintf(command, 512, "/root/bin/run_vm %dM %d --default-so --telnet-port=%d", vm->memory, vm->cpu, 5000 + vm->id);
+	snprintf(command, 512, "/root/bin/run_vm %dM %d --default-so --telnet-port=%d ", vm->memory, vm->cpu, 5000 + vm->id);
 
 	char drive[16] = {0};
 
 	for (int i = 0; i < vol_list->size; i++) {
-		snprintf(drive, 16, "--drive=%d", vol_list->data[i].id);
+		snprintf(drive, 16, "--drive=%d ", vol_list->data[i].id);
 		if (512 - strlen(command) < strlen(drive)){
 			break;
 		}

@@ -34,6 +34,8 @@ create_vm(int id)
 		printf("[ HYPERV_SERVICE ] Error finding vm %d in database\n", id);
 		return -1;
 	}
+	
+	printf("[ TARGET_SERVICE ] VM %d found\n", id);
 
 	volume_list_t vol_list;
 	/* Get all volumes related to vm */
@@ -42,16 +44,18 @@ create_vm(int id)
 		return -1;
 	}
 
+	printf("[ HYPERV_SERVICE ] A total of %d volumes were found for %d\n", vol_list.size, id);
 
 	/* logic to decide the next hypervisor */
 
 	if (ssh_create_vm_with_volumes(h_conns.data[last_h], &vm, &vol_list) != SSH_DII_SUCCESS) {
 	
-		printf("[ HYPERV_SERVICE ] Errot trying to create vm %d in hypervisor %d\n", vm.id, list.data[0].id);
+		printf("[ HYPERV_SERVICE ] Errot trying to create vm %d in hypervisor\n", vm.id);
 
 	} else {
 		last_h++;
-		last_h %= h_conns.size;
+		last_h = last_h % h_conns.size;
+		printf("[ HYPERV_SERVICE ] Changed to hypervisor %d\n", last_h);
 	}
 
 	return 0;
@@ -82,8 +86,8 @@ connection_handler (void *cls, struct MHD_Connection *connection,
 	const char *id_str = url + strlen(prefix);
 	int id = atoi(id_str);
 
-	if (create_volume(id) != 0) {
-		printf("[ HYPERV_SERVICE ] Volume %d was in db but could not create on ssh target\n", id);
+	if (create_vm(id) != 0) {
+		printf("[ HYPERV_SERVICE ] Unable to launch vm %d\n", id);
 		return MHD_NO;
 	}
 
@@ -112,6 +116,8 @@ main (void)
 	}
 
 	init_hyperv_connections_on_db_data(db, &h_conns);
+
+	printf("[ HYPERV_SERVICE ] A total of %d hypervisors where found and connected\n", h_conns.size);
 
 	signal(SIGTERM, stop);
 	signal(SIGINT, stop);

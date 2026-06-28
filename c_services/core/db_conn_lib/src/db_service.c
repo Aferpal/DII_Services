@@ -134,11 +134,14 @@ db_dii_execute_query(const db_connection_t* conn,
                      const char* query,
 		     db_result_t* result)
 {
+
 	if (conn == NULL || query == NULL || result == NULL) {
+		printf("[ DB_LIB ] Null params on db_dii_execute_query\n");
 		return DB_NULL_PARAMS;
 	}
 
 	if (mysql_query(conn->connection, query) != 0) {
+		printf("[ DB_LIB ] Unable to query\n");
 		return DB_FAILURE;
 	}
 
@@ -146,6 +149,7 @@ db_dii_execute_query(const db_connection_t* conn,
 
 	if (response == NULL) {
 		
+		printf("[ DB_LIB ] No_response\n");
 		if (mysql_field_count(conn->connection) == 0) {
 			result->n_rows = mysql_affected_rows(conn->connection);
 			return DB_SUCCESS;
@@ -169,6 +173,7 @@ db_dii_execute_query(const db_connection_t* conn,
 		c_row = mysql_fetch_row(response);
 		
 		if (c_row == NULL) {
+			printf("[ DB_LIB ] Null row\n");
 			mysql_free_result(response);
 			db_dii_free_result(result);
 			return DB_FAILURE;

@@ -14,9 +14,9 @@
 typedef struct hyperv_connections hyperv_connections_t;
 
 struct hyperv_connections {
-	ssh_dii_connection_t* connections[MAX_CONNECTIONS];
+	ssh_dii_connection_t* data[MAX_CONNECTIONS];
 	uint32_t size;
-}
+};
 
 void init_hyperv_connections_on_db_data(const db_dii_connection_t *db, hyperv_connections_t *conns);
 

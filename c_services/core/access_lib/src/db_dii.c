@@ -111,11 +111,13 @@ get_vm_by_id(const db_dii_connection_t *db, uint32_t id, vm_t *vm)
 
 	db_result_t result;
 
-	if (db_dii_execute_query(db, query, &result) != DB_DII_SUCCESS) {
+	if (db_dii_execute_query(db->conn, query, &result) != DB_SUCCESS) {
+		printf("[ DB_ACCESS ] Could not execute query %s\n", query);
 		return DB_DII_FAILURE;
 	}
 
 	if (result.n_rows != 1) {
+		printf("[ DB_ACCESS ] Multiple rows when looking by prim key, abortig...\n");
 		db_dii_free_result(&result);
 		return DB_DII_FAILURE;
 	}
@@ -129,7 +131,7 @@ get_vm_by_id(const db_dii_connection_t *db, uint32_t id, vm_t *vm)
         db_dii_get(&result, "hyperv", 0, &hyperv) != DB_SUCCESS ||
 		db_dii_get(&result, "status", 0, &status) != DB_SUCCESS ||
 		db_dii_get(&result, "memory", 0, &memory) != DB_SUCCESS) {
-
+		printf("[ DB_ACCESS ] Unable to read some fields, aborting...\n");
 		db_dii_free_result(&result);
 		return DB_DII_FAILURE;
 	}
@@ -138,9 +140,9 @@ get_vm_by_id(const db_dii_connection_t *db, uint32_t id, vm_t *vm)
 
 	vm->id = id;
 	vm->cpu = atoi(cpu);
-	vm->hyperv = atoi(hyperv);
+	vm->hyperv = hyperv == NULL ? -1 : atoi(hyperv);
 	vm->memory = atoi(memory);
-	vm->status = status[0];
+	vm->status = status == NULL ? 'C': *status;
 
 	db_dii_free_result(&result);
 
@@ -237,15 +239,13 @@ get_all_volumes_from_vm_id(const db_dii_connection_t *db, uint32_t id, volume_li
 	}
 
 	char query[256] = {0};
-	const char* fmt = "SELECT VOLUME.id, VOLUME.name, VOLUME.storage_size_kbytes \
-						 FROM VOLUME, VM_HAS_VOLUME \
-						 WHERE VM_HAS_VOLUME.vm_id = %d AND VM_HAS_VOLUME.volume_id = VOLUME.id;";
+	const char* fmt = "SELECT VOLUME.id, VOLUME.name, VOLUME.storage_size_kbytes  FROM VOLUME, VM_HAS_VOLUME  WHERE VM_HAS_VOLUME.vm_id = %d AND VM_HAS_VOLUME.volume_id = VOLUME.id;";
 
 	snprintf(query, 256, fmt, id);
-
 	db_result_t result;
 
 	if (db_dii_execute_query(db->conn, query, &result) != DB_SUCCESS) {
+		printf("[ DB_ACCESS ] Unable to execute the query %s\n", query);
 		return DB_DII_FAILURE;
 	}
 
@@ -253,22 +253,27 @@ get_all_volumes_from_vm_id(const db_dii_connection_t *db, uint32_t id, volume_li
 	const char* name;
 	const char* v_id;
 
+	list->size = 0;
+
 	for (int i = 0; i < result.n_rows && i < 8; i++) {
 
 		if (db_dii_get(&result, "name", i, &name) != DB_SUCCESS ||
 			db_dii_get(&result, "storage_size_kbytes", i, &storage) != DB_SUCCESS ||
-			db_dii_Get(&result, "id", i, &v_id)) {
+			db_dii_get(&result, "id", i, &v_id) != DB_SUCCESS) {
+			printf("[ DB_ACCESS ] An error ocurred tryig to read a result %d in get all vols\n", i);
 			db_dii_free_result(&result);
 			return DB_DII_FAILURE;
 		}
 
 		memset(&list->data[i], 0, sizeof(volume_t));
 
-		list->data[i].id = atoi(id);
+		list->data[i].id = atoi(v_id);
 
 		strncpy(list->data[i].name, name, STR_PARAM_LEN - 1);
 
 		list->data[i].size_kb=atoi(storage);
+
+		list->size++;
 	}
 	
 

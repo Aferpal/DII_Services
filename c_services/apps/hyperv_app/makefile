@@ -16,13 +16,13 @@ BUILD_DIR=../../build
 
 OUT_DIR=$(BUILD_DIR)/bin
 
-OBJ_DIR=$(BUILD_DIR)/obj/target
+OBJ_DIR=$(BUILD_DIR)/obj/hyperv
 
-DOCK_TEMP_DIR=$(BUILD_DIR)/docker_fs/target
+DOCK_TEMP_DIR=$(BUILD_DIR)/docker_fs/hyperv
 
 DOCK_IMG_DIR=$(BUILD_DIR)/docker_images
 
-TARGET=target_service
+TARGET=hyperv_service
 
 OBJ_LIST=$(OBJ_DIR)/hyperv_connections.o
 
@@ -43,9 +43,9 @@ docker: clean build
 	ldd $(OUT_DIR)/$(TARGET) | awk '{print $$3}' | grep '^/' |\
 		xargs -I{} cp -v {} $(DOCK_TEMP_DIR)/usr/lib/
 	cp /lib/ld-musl-x86_64.so.1 $(DOCK_TEMP_DIR)/lib/
-	docker build -f Dockerfile_target -t target_service:min $(DOCK_TEMP_DIR)
+	docker build -f Dockerfile_hyperv -t hyperv_service:min $(DOCK_TEMP_DIR)
 	mkdir -p $(DOCK_IMG_DIR)
-	docker save -o $(DOCK_IMG_DIR)/$(TARGET).tar target_service:min
+	docker save -o $(DOCK_IMG_DIR)/$(TARGET).tar hyperv_service:min
 	gzip $(DOCK_IMG_DIR)/$(TARGET).tar
 	rm -rf $(DOCK_TEMP_DIR)
 
