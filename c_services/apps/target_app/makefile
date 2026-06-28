@@ -4,9 +4,9 @@ CFLAGS=-Wall -Wextra -O2 -ffunction-sections -fdata-sections -flto
 
 LDFLAGS=-Wl,--gc-sections -flto
 
-CINCLUDE=-I./inc -I../../core/db_conn_lib/inc -I../../core/ssh_lib/inc $(shell pkg-config --cflags libmicrohttpd) $(shell pkg-config --cflags libssh)
+CINCLUDE=-I./inc -I../core/access_lib/inc
 
-CLINK=-L../../build/lib -ldbconndii -lsshdii -lmicrohttpd -lssh -lmariadb
+CLINK=-L../../build/lib -laccessdii -ldbconndii -lsshdii -lmicrohttpd -lssh -lmariadb
 
 COPTIONS=$(CINCLUDE)
 
@@ -24,7 +24,7 @@ DOCK_IMG_DIR=$(BUILD_DIR)/docker_images
 
 TARGET=target_service
 
-OBJ_LIST=$(OBJ_DIR)/db_dii.o $(OBJ_DIR)/ssh_dii.o
+OBJ_LIST=
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	mkdir -p $(OBJ_DIR)

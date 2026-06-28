@@ -3,9 +3,7 @@
 
 #include<stdint.h>
 
-#include"db_volumes.h"
-
-#include"db_hypervisor.h"
+#include"access_types.h"
 
 #define SSH_TARGET_HOST_ENV "SSH_DII_TARGET_HOST"
 

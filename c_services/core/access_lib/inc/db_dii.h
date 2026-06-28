@@ -1,9 +1,7 @@
 #ifndef _DB_DII_H_
 #define _DB_DII_H_
 
-#include"db_volumes.h"
-
-#include"db_hypervisor.h"
+#include"access_types.h"
 
 #define DB_DII_HOSTNAME_ENV "DB_DII_HOSTNAME"
 
