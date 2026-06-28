@@ -4,7 +4,7 @@ CFLAGS=-Wall -Wextra -O2 -ffunction-sections -fdata-sections -flto
 
 LDFLAGS=-Wl,--gc-sections -flto
 
-CINCLUDE=-I./inc -I../core/access_lib/inc
+CINCLUDE=-I./inc -I../../core/access_lib/inc -I../../core/models $(shell pkg-config --cflags libmicrohttpd)
 
 CLINK=-L../../build/lib -laccessdii -ldbconndii -lsshdii -lmicrohttpd -lssh -lmariadb
 
