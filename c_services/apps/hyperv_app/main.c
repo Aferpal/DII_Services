@@ -45,7 +45,7 @@ create_vm(int id)
 
 	/* logic to decide the next hypervisor */
 
-	if (ssh_create_vm_with_volumes(h_conns.data[last_h], &vm, &volume_list) != SSH_DII_SUCCESS) {
+	if (ssh_create_vm_with_volumes(h_conns.data[last_h], &vm, &vol_list) != SSH_DII_SUCCESS) {
 	
 		printf("[ HYPERV_SERVICE ] Errot trying to create vm %d in hypervisor %d\n", vm.id, list.data[0].id);
 

@@ -132,6 +132,35 @@ ssh_export_volume(const ssh_dii_connection_t *ssh, volume_t* vol, hypervisor_t *
 
 }
 
+ssh_dii_status_t
+ssh_create_vm_with_volumes(const ssh_dii_connection_t *ssh, vm_t *vm, volume_list_t *vol_list)
+{
+	if (ssh == NULL || vm == NULL || vol_list == NULL) {
+		return SSH_DII_NULL_PARAMS;
+	}
+
+	char command[512] = {0};
+
+	snprintf(command, 512, "/root/bin/run_vm %dM %d --default-so --telnet-port=%d", vm->memory, vm->cpu, 5000 + vm->id);
+
+	char drive[16] = {0};
+
+	for (int i = 0; i < vol_list->size; i++) {
+		snprintf(drive, 16, "--drive=%d", vol_list->data[i].id);
+		if (512 - strlen(command) < strlen(drive)){
+			break;
+		}
+		strcat(command, drive);
+	}
+
+	uint32_t res;
+
+	if (ssh_dii_exec_command(ssh, command, &res) != SSH_DII_SUCCESS) {
+		return SSH_DII_FAILURE;
+	}
+	
+	return res == 0 ? SSH_DII_SUCCESS : SSH_DII_FAILURE;
+}
 
 
 ssh_dii_status_t

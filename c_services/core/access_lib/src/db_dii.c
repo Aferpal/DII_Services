@@ -105,9 +105,9 @@ get_vm_by_id(const db_dii_connection_t *db, uint32_t id, vm_t *vm)
 		return DB_DII_NULL_PARAMS;
 	}
 	
-	char query[128] = {0};
+	char query[64] = {0};
 
-	snprintf(query, "SELECT * FROM VM WHERE id = %d", id);
+	snprintf(query, 64, "SELECT * FROM VM WHERE id = %d", id);
 
 	db_result_t result;
 
@@ -116,8 +116,35 @@ get_vm_by_id(const db_dii_connection_t *db, uint32_t id, vm_t *vm)
 	}
 
 	if (result.n_rows != 1) {
-		
+		db_dii_free_result(&result);
+		return DB_DII_FAILURE;
 	}
+
+	const char* cpu;
+	const char* hyperv;
+	const char* memory;
+	const char* status;
+
+	if (db_dii_get(&result, "cpu", 0, &cpu) != DB_SUCCESS ||
+        db_dii_get(&result, "hyperv", 0, &hyperv) != DB_SUCCESS ||
+		db_dii_get(&result, "status", 0, &status) != DB_SUCCESS ||
+		db_dii_get(&result, "memory", 0, &memory) != DB_SUCCESS) {
+
+		db_dii_free_result(&result);
+		return DB_DII_FAILURE;
+	}
+
+	memset(vm, 0, sizeof(*vm));
+
+	vm->id = id;
+	vm->cpu = atoi(cpu);
+	vm->hyperv = atoi(hyperv);
+	vm->memory = atoi(memory);
+	vm->status = status[0];
+
+	db_dii_free_result(&result);
+
+	return DB_DII_SUCCESS;
 }
 
 db_dii_status_t
@@ -205,6 +232,49 @@ get_all_hypervisors(const db_dii_connection_t *db, hypervisor_list_t *list)
 db_dii_status_t
 get_all_volumes_from_vm_id(const db_dii_connection_t *db, uint32_t id, volume_list_t *list) 
 {
+	if (db == NULL || list == NULL) {
+		return DB_DII_NULL_PARAMS;
+	}
+
+	char query[256] = {0};
+	const char* fmt = "SELECT VOLUME.id, VOLUME.name, VOLUME.storage_size_kbytes \
+						 FROM VOLUME, VM_HAS_VOLUME \
+						 WHERE VM_HAS_VOLUME.vm_id = %d AND VM_HAS_VOLUME.volume_id = VOLUME.id;";
+
+	snprintf(query, 256, fmt, id);
+
+	db_result_t result;
+
+	if (db_dii_execute_query(db->conn, query, &result) != DB_SUCCESS) {
+		return DB_DII_FAILURE;
+	}
+
+	const char* storage;
+	const char* name;
+	const char* v_id;
+
+	for (int i = 0; i < result.n_rows && i < 8; i++) {
+
+		if (db_dii_get(&result, "name", i, &name) != DB_SUCCESS ||
+			db_dii_get(&result, "storage_size_kbytes", i, &storage) != DB_SUCCESS ||
+			db_dii_Get(&result, "id", i, &v_id)) {
+			db_dii_free_result(&result);
+			return DB_DII_FAILURE;
+		}
+
+		memset(&list->data[i], 0, sizeof(volume_t));
+
+		list->data[i].id = atoi(id);
+
+		strncpy(list->data[i].name, name, STR_PARAM_LEN - 1);
+
+		list->data[i].size_kb=atoi(storage);
+	}
+	
+
+	db_dii_free_result(&result);
+
+	return DB_DII_SUCCESS;
 }
 
 
